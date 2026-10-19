@@ -61,6 +61,9 @@ args = ["--size", "248x412"]        # extra arguments (flutter: embedder options
 categories = ["Utility"]            # freedesktop categories
 keywords = ["hello", "greeting"]    # optional, for search
 url_schemes = ["hello"]             # handled URL schemes (x-scheme-handler/hello)
+generic_name = "Greeter"            # optional: GenericName of its desktop entry
+comment = "Says hello"              # optional: Comment of its desktop entry
+share = false                       # optional: a target of the Share menu (X-Silica-Share)
 
 [types]                             # the MIME types it opens, with its role
 "text/x-hello" = "editor"           # editor | viewer
@@ -133,6 +136,24 @@ else reaches the app through the portals (the Open and Save dialogs, the documen
 signed by the Silica release key, and run without a sandbox (they are part of the system:
 the Terminal and the file manager need the whole computer). Each still installs a desktop
 entry in `/usr/share/applications` (with `X-Silica-Bundle=`), so tools outside Silica find it.
+
+### 3.1 Silica's own apps
+
+Every app of Silica is a bundle in `/usr/Applications` (silica-packages; in the development
+VM, `/var/lib/silica-dev/Applications`), built from its repository's `linux/Info.toml.in`.
+They run unsandboxed because they are system apps, never because of their permissions: their
+`[permissions]` say what a copy outside the system folders (which is a plain bundle, and runs
+sandboxed) is given, and that copy works only as far as the sandbox allows.
+
+| App | Bundle | Permissions of a copy | Why it must run from the system folder |
+| --- | --- | --- | --- |
+| Mustache | `Mustache.app` | `home`, `/media`, `/mnt`, background | the file manager: every file, the volumes, the desktop's icons (`--desktop`, started by the session from the bundle) and the Open and Save dialogs (the portal runs the bundle's embedder command directly, with `--helper`) |
+| Mail | `Mail.app` | network, `xdg-download`, talks to `dev.frascella.Mail`, Share target | its engine, `silica-mail-engine`, stays a system D-Bus service (`dev.frascella.Mail`, activated on demand) outside the bundle |
+| Terminal | `Terminal.app` | network, every device, `home` | runs the user's shell and its programs, with a pseudo-terminal |
+| Settings | `Settings.app` | `home` | the system bus (network, Bluetooth, power) and polkit actions: a sandboxed copy has no system bus |
+| Preview | `Preview.app` | none (the files it opens are bound) | viewer of images and PDF |
+| Text Editor | `Text Editor.app` | none (the files it opens are bound) | editor of plain and rich text |
+| Clock, Calculator, Notes | `<Name>.app` | none | |
 
 Mustache shows the three folders as one Applications view, plus the Flatpak apps as virtual
 items; system apps cannot be moved to the Trash.
@@ -285,8 +306,8 @@ The first launch of a quarantined app goes through `Trust1` (silica-desktop
   are the image's `/usr`), the folder of the developer CA keys, the polkit action
   `dev.silica.trust.override` (Open Anyway) and the MIME types `application/x-silica-volume`
   (`*.sxv`, magic `SILICAXV`) and `application/x-silica-app-archive` (`*.silicaapp`).
-- Silica's own apps as bundles in `/usr/Applications` (silica-packages; the Calculator first),
-  each with a desktop entry in `/usr/share/applications` carrying `X-Silica-Bundle=`.
+- Silica's own apps as bundles in `/usr/Applications` (silica-packages, § 3.1), each with a
+  desktop entry in `/usr/share/applications` carrying `X-Silica-Bundle=`.
 - The polkit action `dev.silica.applications.install`, whose `exec.path` is the helper (this
   repository, `rootfs/`).
 - The tmpfiles entry for `/var/Applications` and the `/Applications` link.
