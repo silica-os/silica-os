@@ -99,10 +99,14 @@ when the meaning of existing keys changes, and a reader refuses a `format` it do
 
 `runtime`:
 
-- `dev.silica.Platform//1`: the Silica platform, branch 1. In Silica OS it is the image's own
-  `/usr` (section 6), so its contents are the embedder, the Flutter engine, fonts and the
-  Adwaita cursors today, and libvetro and Skia after silica-desktop#254. Branch 1 promises the
-  embedder's command line and protocols of Silica 1.x.
+- `dev.silica.Platform//1`: the Silica platform, branch 1: the embedder and the Flutter engine
+  today, libvetro and Skia after silica-desktop#254. Branch 1 promises the embedder's command
+  line and protocols of Silica 1.x. It is also a Flatpak runtime of that name, built on
+  `org.freedesktop.Platform//24.08` from silica-desktop's `data/flatpak/dev.silica.Platform.yml`
+  (`cargo xtask platform-runtime --build`, silica-desktop#258): when it is installed,
+  `silica-launch` gives sandboxed bundles its files as `/usr`, so the same bundle runs on any
+  distribution with Flatpak; when it is not, the platform is the image's own `/usr` (Silica OS
+  ships no copy of it).
 - `org.freedesktop.Platform//<branch>`: a Flatpak runtime installed from Flathub
   (`/var/lib/flatpak/runtime/…/active/files`); for native apps built with the freedesktop SDK.
 - `none`: the bundle carries everything (`lib/`); the sandbox gets an empty `/usr` but for the
