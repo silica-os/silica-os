@@ -127,7 +127,7 @@ else reaches the app through the portals (the Open and Save dialogs, the documen
 | `/usr/Applications` | the image (RPMs); read-only | `system` |
 | `/Applications` → `/var/Applications` | `wheel` (setgid group); others through polkit `dev.silica.applications.install` | `bundle` |
 | `~/Applications` | the user | `bundle` |
-| `/var/lib/silica-dev/Applications` | `cargo xtask os deploy` (development VM only) | `bundle` |
+| `/var/lib/silica-dev/Applications` | `cargo xtask os deploy` (development VM only, root-owned) | `system` |
 
 `/usr/Applications` replaces `/usr/lib64/silica/apps`: Silica's own apps are bundles there,
 signed by the Silica release key, and run without a sandbox (they are part of the system:
@@ -278,14 +278,18 @@ The first launch of a quarantined app goes through `Trust1` (silica-desktop
 
 ## 7. What the image ships
 
-- Packages: `bubblewrap`, `xdg-dbus-proxy`, `erofs-utils`, `erofs-fuse`, `fuse3`, `flatpak`.
-- `/usr/Applications/` with Silica's apps as bundles (silica-packages).
-- `/usr/share/silica/trust/developer-ca/silica-release.pub`: the key Silica's own bundles are
-  signed with (listed as a CA key so they are *verified*).
-- `/usr/share/silica/runtimes/dev.silica.Platform/1/metadata`: declares the platform runtime,
-  whose files are the image's `/usr`.
-- polkit actions `dev.silica.applications.install` (copying into `/Applications`) and
-  `dev.silica.trust.override` (Open Anyway).
-- The MIME type `application/x-silica-volume` (`*.sxv`) and `application/x-silica-app`
-  (`*.app` folders are recognised by Mustache by their `Contents/Info.toml`).
+- Packages: `bubblewrap`, `xdg-dbus-proxy`, `erofs-utils`, `erofs-fuse`, `fuse3`, `flatpak`
+  (Containerfile), and silica-packages' `silica-apps`: `silica-launch`, `silica-bundle`,
+  `silica-quarantine`, `/usr/libexec/silica/silica-applications-helper`, `/usr/Applications/`,
+  `/usr/share/silica/runtimes/dev.silica.Platform/1/metadata` (the platform runtime, whose files
+  are the image's `/usr`), the folder of the developer CA keys, the polkit action
+  `dev.silica.trust.override` (Open Anyway) and the MIME types `application/x-silica-volume`
+  (`*.sxv`, magic `SILICAXV`) and `application/x-silica-app-archive` (`*.silicaapp`).
+- Silica's own apps as bundles in `/usr/Applications` (silica-packages; the Calculator first),
+  each with a desktop entry in `/usr/share/applications` carrying `X-Silica-Bundle=`.
+- The polkit action `dev.silica.applications.install`, whose `exec.path` is the helper (this
+  repository, `rootfs/`).
 - The tmpfiles entry for `/var/Applications` and the `/Applications` link.
+- Later: `/usr/share/silica/trust/developer-ca/silica-release.pub`, the public key Silica's
+  bundles are signed with, once the release key exists (its secret half stays with the release
+  pipeline). Until then Silica's own apps are trusted by their folder, `/usr/Applications`.

@@ -27,6 +27,7 @@ RUN dnf -y install \
         pipewire pipewire-pulseaudio pipewire-utils wireplumber \
         NetworkManager NetworkManager-wifi \
         flatpak xdg-desktop-portal xdg-user-dirs xdg-utils \
+        bubblewrap xdg-dbus-proxy erofs-utils erofs-fuse fuse3 \
         rsms-inter-fonts google-noto-sans-fonts google-noto-color-emoji-fonts dejavu-sans-fonts fontconfig \
         adwaita-cursor-theme \
         polkit greetd greetd-selinux \

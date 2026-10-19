@@ -4,7 +4,8 @@
  "http://www.freedesktop.org/standards/PolicyKit/1/policyconfig.dtd">
 <!-- Installing into and removing from /Applications (silica-os#3). The file manager asks for
      this action when a user who cannot write /var/Applications drops an app bundle there or
-     moves one to the Trash; the privileged helper is part of silica-desktop. -->
+     moves one to the Trash: it runs silica-desktop's helper through pkexec
+     (docs/app-bundles.md § 3). -->
 <policyconfig>
   <vendor>Silica</vendor>
   <vendor_url>https://github.com/silica-os</vendor_url>
@@ -17,5 +18,6 @@
       <allow_inactive>auth_admin</allow_inactive>
       <allow_active>auth_admin_keep</allow_active>
     </defaults>
+    <annotate key="org.freedesktop.policykit.exec.path">/usr/libexec/silica/silica-applications-helper</annotate>
   </action>
 </policyconfig>
